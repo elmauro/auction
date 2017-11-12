@@ -1,0 +1,45 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+      "consistent-return": 0,
+      "no-console": ["error", { "allow": ["log", "time", "timeEnd"] }],
+      "no-mixed-operators": ["error", {"allowSamePrecedence": true}],
+      "max-len": ["warn", 120],
+      "comma-dangle": ["error", {
+        "objects": "always-multiline",
+        "imports": "always-multiline",
+        "exports": "always-multiline",
+        "functions": "never"
+      }],
+      "import/newline-after-import": "off",
+      "import/no-dynamic-require": "off",
+      "global-require": "off",
+      "no-plusplus": "off",
+      "no-param-reassign": "off",
+      "no-underscore-dangle": "off",
+      "no-unused-expressions": 0,
+      "chai-friendly/no-unused-expressions": 2
+    },
+    "plugins": [
+      "chai-friendly"
+    ],
+    "env": {
+      "browser": true,
+      "node": true,
+      "mocha": true
+    },
+    "globals": {
+      "setImmediate": true,
+      "request": true,
+      "productionRequest": true,
+      "providerDatabase": true,
+      "extraDatabase": true,
+      "centralDatabase": true,
+      "jobsDatabase": true,
+      "serviceDiscovery": true,
+      "expect": false,
+      "StreamHelper": false,
+      "WhiteLabelProvider": false,
+      "sinon": false
+    }
+  }

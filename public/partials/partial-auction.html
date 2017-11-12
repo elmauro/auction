@@ -1,0 +1,48 @@
+<div class="container">
+        <h3>Current Auction</h3>
+        <div class="panel panel-default">
+            <div ng-hide="showCurrent">
+                <h5>No auction at the moment</h5>
+            </div>
+            <div class="panel-body" ng-show="showCurrent">
+                <div class="row">
+                    <h4>Seller: {{ currentAuction.seller }}</h4>
+                </div>
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3">
+                        <img src="{{currentAuction.image}}" height="50px" width="50px" alt="">
+                        <div>
+                            {{ currentAuction.name }}  
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <h5>Quantity</h5>
+                        {{ currentAuction.quantity }}
+                    </div>
+                </div>
+                <div class="row">
+                    <h5>Time left: {{ currentAuction.time }}</h5>
+                </div>
+                <div class="row" ng-hide="showMinimum">
+                    <h5>Winning bid: {{ currentAuction.winBid }}</h5>
+                </div>
+                <div class="row" ng-show="showMinimum">
+                    <h5>Minimum bid: {{ currentAuction.minBid }}</h5>
+                </div>
+                <div class="row">
+                    <input type="number" ng-model="bid">
+                </div>
+                <div class="row">
+                    <img src="/images/bid.jpg" height="50px" width="50px">
+                    <button type="button" class="btn btn-info btn-lg" ng-click="placeBid()">Place bid</button>
+                </div>
+                <div class="alert alert-danger" ng-if="bidErrorMessage">
+                    <strong>Error!</strong> {{ bidErrorMessage }}
+                </div>
+            </div>
+            <div class="alert alert-success" ng-if="winningMessage">
+                <strong>Success!</strong> {{ winningMessage }}.
+            </div>
+        </div>
+    </div>

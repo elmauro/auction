@@ -1,0 +1,22 @@
+<div class="container">
+    <h3>Player Stats</h3>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <label class="control-label col-sm-3" for="name">Username:</label>
+                <div class="col-sm-3">
+                    <label>{{ user.username }}</label>
+                </div>
+            </div>
+            <div class="row">
+                <label class="control-label col-sm-3" for="name">Coins:</label>
+                <div class="col-sm-3">
+                    <label>{{ user.coins }}</label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="leave()">Leave</button>
+        </div>
+    </div>
+</div>

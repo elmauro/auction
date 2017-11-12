@@ -1,0 +1,34 @@
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+        
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Auction for {{ selectedItem.name }}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <label class="control-label col-sm-4" for="name">Quantity:</label>
+                        <div class="col-sm-2">
+                            <input type="number" ng-model="qtyAuction">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="control-label col-sm-4" for="name">Minimun bid value:</label>
+                        <div class="col-sm-2">
+                            <input type="number" ng-model="minBidAuction">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info btn-lg" ng-model="currentAuction" ng-click="startAuction()">Start Auction</button>
+                    <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                </div>
+                <div class="alert alert-danger" ng-if="errorMessage">
+                    <strong>Error!</strong> {{ errorMessage }}
+                </div>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,33 @@
+<div class="container">
+    <h3>Inventory</h3>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="scrollable-content" ng-model="inventory">
+                    <div ng-repeat="item in inventory" class="list-group">
+                        <div class="row">
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-3">
+                                <img src="{{item.image}}" height="50px" width="50px" alt="">
+                                <div>
+                                    {{ item.name }}  
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <h5>Quantity</h5>
+                                {{ item.quantity }}
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="image" src="images/auction.jpg" height="50px" width="50px" ng-click="open($index)" data-toggle="modal" data-target="#myModal"/>
+                                <div>
+                                    Auction  
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <modal-dialog></modal-dialog>
+        </div>
+    </div>
+</div>
