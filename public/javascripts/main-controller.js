@@ -89,8 +89,8 @@ angular.module('UIApp')
           $scope.auction.seller = $scope.user.username;
           $scope.auction.time = 90;
 
-          $scope.qtyAuction = '';
-          $scope.minBidAuction = '';
+          $scope.qtyAuction = 0;
+          $scope.minBidAuction = 0;
           SocketService.emit('Auction', $scope.auction);
         }
       };
