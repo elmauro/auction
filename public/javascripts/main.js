@@ -1,5 +1,5 @@
 (function () {
-  const module = angular.module('UIApp', ['ui.router', 'btford.socket-io', 'ngStorage'])
+  angular.module('UIApp', ['ui.router', 'btford.socket-io', 'ngStorage'])
     .config([
       '$stateProvider',
       '$urlRouterProvider',

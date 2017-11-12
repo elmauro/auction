@@ -6,6 +6,15 @@ const common = require('./common');
 const expect = require('chai').expect;
 const request = require('request');
 
+function expected(error, response) {
+  const body = JSON.parse(response.body);
+
+  expect(error).to.be.null;
+  expect(response.statusCode).to.equal(200);
+  expect(body).to.be.an('array');
+  expect(body).to.have.lengthOf(1);
+}
+
 // Our parent block
 describe('Users', () => {
   before((done) => {
@@ -21,12 +30,7 @@ describe('Users', () => {
 
     it('it should GET all the users', (done) => {
       request(url, (error, response) => {
-        const body = JSON.parse(response.body);
-
-        expect(error).to.be.null;
-        expect(response.statusCode).to.equal(200);
-        expect(body).to.be.an('array');
-        expect(body).to.have.lengthOf(1);
+        expected(error, response);
         done();
       });
     });
@@ -52,12 +56,7 @@ describe('Users', () => {
 
     it('it should GET an user by the given username', (done) => {
       request(url, (error, response) => {
-        const body = JSON.parse(response.body);
-
-        expect(error).to.be.null;
-        expect(response.statusCode).to.equal(200);
-        expect(body).to.be.an('array');
-        expect(body).to.have.lengthOf(1);
+        expected(error, response);
         done();
       });
     });
