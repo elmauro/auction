@@ -6,6 +6,8 @@ angular.module('UIApp')
     function ($scope, SocketService, $http, $location, $sessionStorage) {
       let self;
 
+      logic.scope = $scope;
+
       $scope.initValues = () => {
         $scope.showCurrent = false;
         $scope.showMinimum = false;
@@ -76,7 +78,7 @@ angular.module('UIApp')
       };
 
       $scope.startAuction = () => {
-        if ($scope.validateAuction()) {
+        if (logic.validateAuction()) {
           $scope.close();
           $scope.showMinimum = true;
           $scope.auction.selectedIndex = $scope.selectedIndex;
@@ -95,62 +97,13 @@ angular.module('UIApp')
         }
       };
 
-      $scope.validateAuction = () => {
-        if ($scope.currentAuction.seller) {
-          $scope.errorMessage = 'There is an auction in progress!';
-          return false;
-        }
-
-        if ($scope.qtyAuction > $scope.selectedItem.quantity) {
-          $scope.errorMessage = 'The quantity can’t be greater than the available item quantity!';
-          return false;
-        }
-
-        if ($scope.qtyAuction <= 0 || $scope.minBidAuction <= 0) {
-          $scope.errorMessage = 'The values must be greater that 0!';
-          return false;
-        }
-
-        return true;
-      }
-
       $scope.placeBid = () => {
-        if ($scope.validateBid()) {
+        if (logic.validateBid()) {
           $scope.winner.id = $scope.user.id;
           $scope.winner.username = $scope.user.username;
           $scope.winner.bid = $scope.bid;
           SocketService.emit('placeBid', $scope.winner);
         }
-      };
-
-      $scope.validateBid = () => {
-        if (!$scope.currentAuction.seller) {
-          $scope.bidErrorMessage = 'There is not an auction in progress!';
-          return false;
-        }
-
-        if ($scope.bid < $scope.currentAuction.minBid && $scope.currentAuction.winBid === 0) {
-          $scope.bidErrorMessage = 'The bid value must be  at least equal to the minimum bid!';
-          return false;
-        }
-
-        if ($scope.bid <= $scope.currentAuction.winBid) {
-          $scope.bidErrorMessage = 'The bid value must always be higher than the current winning bid!';
-          return false;
-        }
-
-        if ($scope.user.id === $scope.currentAuction.sellerId) {
-          $scope.bidErrorMessage = 'No, you are the same seller!';
-          return false;
-        }
-
-        if ($scope.bid > $scope.user.coins) {
-          $scope.bidErrorMessage = 'You must to have more coins!';
-          return false;
-        }
-
-        $scope.bidErrorMessage = undefined;
-        return true;
       };
 
       $scope.updateSeller = () => {
