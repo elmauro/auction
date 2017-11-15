@@ -63,6 +63,7 @@ DEL
 	Execute:
 
 	1. npm test
+	2. npm run coverage
 
 
 ## Future Work
