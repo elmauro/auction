@@ -6,8 +6,6 @@ angular.module('UIApp')
     function ($scope, SocketService, $http, $location, $sessionStorage) {
       let self;
 
-      logic.scope = $scope;
-
       $scope.initValues = () => {
         $scope.showCurrent = false;
         $scope.showMinimum = false;
@@ -75,80 +73,80 @@ angular.module('UIApp')
       $scope.close = () => {
         $('#myModal').modal('toggle');
         $scope.errorMessage = undefined;
+        $scope.qtyAuction = 0;
+        $scope.minBidAuction = 0;
       };
 
       $scope.startAuction = () => {
-        if (logic.validateAuction()) {
-          $scope.close();
-          $scope.showMinimum = true;
-          $scope.auction.selectedIndex = $scope.selectedIndex;
-          $scope.auction.image = $scope.selectedItem.image;
-          $scope.auction.name = $scope.selectedItem.name;
-          $scope.auction.quantity = $scope.qtyAuction;
-          $scope.auction.winBid = 0;
-          $scope.auction.minBid = $scope.minBidAuction;
-          $scope.auction.sellerId = $scope.user.id;
-          $scope.auction.seller = $scope.user.username;
-          $scope.auction.time = 90;
+        const scope = {};
+        scope.currentAuction = {
+          seller: $scope.currentAuction.seller,
+          user: $scope.user,
+        };
+        scope.qtyAuction = $scope.qtyAuction;
+        scope.selectedItem = $scope.selectedItem;
+        scope.minBidAuction = $scope.minBidAuction;
 
+        $scope.auction.user = $scope.user;
+        $scope.auction.selectedIndex = $scope.selectedIndex;
+        $scope.auction.image = $scope.selectedItem.image;
+        $scope.auction.name = $scope.selectedItem.name;
+        $scope.auction.quantity = $scope.qtyAuction;
+        $scope.auction.winBid = 0;
+        $scope.auction.minBid = $scope.minBidAuction;
+        $scope.auction.sellerId = $scope.user.id;
+        $scope.auction.seller = $scope.user.username;
+        $scope.auction.time = 90;
+
+        scope.auction = $scope.auction;
+        SocketService.emit('Auction', scope);
+      };
+
+      SocketService.on('currentAuction', (response) => {
+        if (response.valid === true) {
+          if (response.currentAuction.sellerId === $scope.user.id && response.toggle) {
+            $scope.close();
+          }
+          $scope.showMinimum = true;
           $scope.qtyAuction = 0;
           $scope.minBidAuction = 0;
-          SocketService.emit('Auction', $scope.auction);
+
+          if (!$scope.currentAuction.seller) {
+            $scope.showCurrent = true;
+            $scope.showMinimum = true;
+          }
+          $scope.currentAuction = response.currentAuction;
+        } else {
+          $scope.errorMessage = response.message;
         }
-      };
+      });
 
       $scope.placeBid = () => {
-        if (logic.validateBid()) {
-          $scope.winner.id = $scope.user.id;
-          $scope.winner.username = $scope.user.username;
-          $scope.winner.bid = $scope.bid;
-          SocketService.emit('placeBid', $scope.winner);
+        const scope = {};
+        scope.user = $scope.user;
+        scope.currentAuction = {
+          user: $scope.currentAuction.user,
+          seller: $scope.currentAuction.seller,
+          minBid: $scope.currentAuction.minBid,
+          winBid: $scope.currentAuction.winBid,
+          sellerId: $scope.currentAuction.sellerId,
+        };
+        scope.winner = $scope.user;
+        scope.winner.bid = $scope.bid;
+        scope.bid = $scope.bid;
+
+        SocketService.emit('placeBid', scope);
+      };
+
+      SocketService.on('currentBid', (response) => {
+        if (response.valid === true) {
+          $scope.showMinimum = false;
+          $scope.winner = response.winner;
+          $scope.currentAuction.winBid = response.winner.bid;
+        } else {
+          $scope.bidErrorMessage = response.message;
         }
-      };
-
-      $scope.updateSeller = () => {
-        const name = $scope.currentAuction.name;
-        const quantity = $scope.currentAuction.quantity;
-
-        $http({
-          method: 'PUT',
-          url: `/api/users/${$scope.user.id}`,
-          data: {
-            username: $scope.user.username,
-            coins: $scope.user.coins + $scope.winner.bid,
-            breads: name === 'breads' ? $scope.user.breads - quantity : $scope.user.breads,
-            carrots: name === 'carrots' ? $scope.user.carrots - quantity : $scope.user.carrots,
-            diamond: name === 'diamond' ? $scope.user.diamond - quantity : $scope.user.diamond,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }).then(() => {
-          $scope.init();
-        });
-      };
-
-      $scope.updateUser = () => {
-        const name = $scope.currentAuction.name;
-        const quantity = $scope.currentAuction.quantity;
-
-        $http({
-          method: 'PUT',
-          url: `/api/users/${$scope.user.id}`,
-          data: {
-            username: $scope.user.username,
-            coins: $scope.user.coins - $scope.winner.bid,
-            breads: name === 'breads' ? $scope.user.breads + quantity : $scope.user.breads,
-            carrots: name === 'carrots' ? $scope.user.carrots + quantity : $scope.user.carrots,
-            diamond: name === 'diamond' ? $scope.user.diamond + quantity : $scope.user.diamond,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }).then(() => {
-          $scope.init();
-        });
-      };
+      });
 
       SocketService.on('counter', (count) => {
         $scope.currentAuction.time = count;
@@ -162,31 +160,11 @@ angular.module('UIApp')
         }
       });
 
-      SocketService.on('currentAuction', (currentAuction) => {
-        if (!$scope.currentAuction.seller) { 
-          $scope.showCurrent = true;
-          $scope.showMinimum = true;
-        }
-        $scope.currentAuction = currentAuction;
-      });
-
-      SocketService.on('currentBid', (winner) => {
-        $scope.showMinimum = false;
-        $scope.winner = winner;
-        $scope.currentAuction.winBid = winner.bid;
-      });
-
       SocketService.on('winner', (win) => {
         $scope.winner = win;
 
         if (win.username) {
-          if ($scope.user.id === $scope.currentAuction.sellerId) {
-            $scope.updateSeller();
-          }
-
-          if ($scope.user.id === $scope.winner.id) {
-            $scope.updateUser();
-          }
+          $scope.init();
 
           $scope.winningMessage = `Winning bid ${win.bid} by ${win.username}`;
           let counter = 10;

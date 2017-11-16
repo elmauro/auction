@@ -3,10 +3,13 @@ const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const cors = require('cors');  
+const cors = require('cors');
 
 const index = require('./routes/index');
 const users = require('./routes/users');
+
+const logic = require('./controllers/logic');
+const UserCtrl = require('./controllers/users');
 
 const socket_io = require('socket.io');
 const db = require('./models');
@@ -36,31 +39,72 @@ app.io = io;
 io.on('connection', (socket) => {
   console.log('connected');
 
-  socket.on('Auction', (auction) => {
-    counter = auction.time;
-    const WinnerCountdown = setInterval(() => {
-      io.emit('counter', counter);
-      counter--;
+  socket.on('Auction', (scope) => {
+    logic.scope = scope;
+    logic.scope.currentAuction = scope.currentAuction;
+    logic.scope.auction = scope.auction;
+    logic.scope.auction.time = 10;
 
-      if (counter === -1) {
-        console.log('Auction ended! ', winner);
-        io.emit('winner', winner);
-        clearInterval(WinnerCountdown);
-        currentAuction = {};
-        winner = {};
+    UserCtrl.getUser(scope, (response) => {
+      const user = response[0];
+
+      scope.inventory = [
+        { name: 'breads', quantity: user.breads, image: 'images/bread.jpg' },
+        { name: 'carrots', quantity: user.carrots, image: 'images/carrot.png' },
+        { name: 'diamond', quantity: user.diamond, image: 'images/diamond.jpg' }
+      ];
+
+      logic.scope.selectedItem = scope.inventory[scope.auction.selectedIndex];
+
+      if (logic.validateAuction()) {
+        counter = logic.scope.auction.time;
+        const WinnerCountdown = setInterval(() => {
+          io.emit('counter', counter);
+          counter--;
+
+          if (counter < 0) {
+            console.log('Auction ended! ', winner);
+
+            if (winner.username) {
+              UserCtrl.updateSeller(scope, scope.currentAuction.sellerId, () => {
+                UserCtrl.updateBuyer(scope, scope.winner.id, () => {
+                  io.emit('winner', winner);
+
+                  clearInterval(WinnerCountdown);
+                  currentAuction = {};
+                  winner = {};
+                });
+              });
+            }
+          }
+        }, 1000);
+
+        currentAuction = scope.auction;
+        io.emit('currentAuction', { message: '', valid: true, currentAuction, toggle: true });
+      } else {
+        io.emit('currentAuction', {
+          message: logic.scope.errorMessage,
+          valid: false,
+          currentAuction: undefined,
+          toggle: false });
       }
-    }, 1000);
-
-    currentAuction = auction;
-    io.emit('currentAuction', currentAuction);
+    });
   });
 
-  socket.on('placeBid', (win) => {
-    if (counter < 10) {
-      counter = 10;
+  socket.on('placeBid', (scope) => {
+    logic.scope.user = scope.user;
+    logic.scope.currentAuction = currentAuction;
+    logic.scope.winner = scope.winner;
+
+    if (logic.validateBid()) {
+      if (counter < 10) {
+        counter = 10;
+      }
+      winner = scope.winner;
+      io.emit('currentBid', { message: '', valid: true, winner });
+    } else {
+      io.emit('currentBid', { message: logic.scope.bidErrorMessage, valid: false, winner: undefined });
     }
-    winner = win;
-    io.emit('currentBid', winner);
   });
 
   socket.on('clearWinningMessage', () => {
@@ -69,7 +113,7 @@ io.on('connection', (socket) => {
 
   socket.on('getCurrentAuction', () => {
     if (currentAuction.sellerId) {
-      io.emit('currentAuction', currentAuction);
+      io.emit('currentAuction', { message: '', valid: true, currentAuction, toggle: false });
       if (counter) {
         io.emit('counter', counter);
       }

@@ -70,3 +70,57 @@ exports.deleteUser = (req, res) => {
     res.status(500).json(error);
   });
 };
+
+exports.updateSeller = (scope, _id, callback) => {
+  const name = scope.currentAuction.name;
+  const quantity = scope.currentAuction.quantity;
+
+  User.update({
+    username: scope.currentAuction.seller,
+    coins: scope.currentAuction.user.coins + scope.winner.bid,
+    breads: name === 'breads' ? scope.currentAuction.user.breads - quantity : scope.currentAuction.user.breads,
+    carrots: name === 'carrots' ? scope.currentAuction.user.carrots - quantity : scope.currentAuction.user.carrots,
+    diamond: name === 'diamond' ? scope.currentAuction.user.diamond - quantity : scope.currentAuction.user.diamond,
+  }, {
+    where: {
+      id: _id,
+    },
+  }).then(() => {
+    callback();
+  }).catch((error) => {
+    console.log(error);
+  });
+};
+
+exports.updateBuyer = (scope, _id, callback) => {
+  const name = scope.currentAuction.name;
+  const quantity = scope.currentAuction.quantity;
+
+  User.update({
+    username: scope.winner.username,
+    coins: scope.winner.coins - scope.winner.bid,
+    breads: name === 'breads' ? scope.winner.breads + quantity : scope.winner.breads,
+    carrots: name === 'carrots' ? scope.winner.carrots + quantity : scope.winner.carrots,
+    diamond: name === 'diamond' ? scope.winner.diamond + quantity : scope.winner.diamond,
+  }, {
+    where: {
+      id: _id,
+    },
+  }).then(() => {
+    callback();
+  }).catch((error) => {
+    console.log(error);
+  });
+};
+
+exports.getUser = (scope, callback) => {
+  User.findAll({
+    where: {
+      username: scope.currentAuction.user.username,
+    },
+  }).then((users) => {
+    callback(users);
+  }).catch((error) => {
+    console.log(error);
+  });
+};
