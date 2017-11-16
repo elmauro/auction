@@ -94,7 +94,6 @@ angular.module('UIApp')
         $scope.auction.quantity = $scope.qtyAuction;
         $scope.auction.winBid = 0;
         $scope.auction.minBid = $scope.minBidAuction;
-        $scope.auction.sellerId = $scope.user.id;
         $scope.auction.seller = $scope.user.username;
         $scope.auction.time = 90;
 
@@ -104,7 +103,7 @@ angular.module('UIApp')
 
       SocketService.on('currentAuction', (response) => {
         if (response.valid === true) {
-          if (response.currentAuction.sellerId === $scope.user.id && response.toggle) {
+          if (response.currentAuction.seller === $scope.user.username && response.toggle) {
             $scope.close();
           }
           $scope.showMinimum = true;
@@ -129,7 +128,6 @@ angular.module('UIApp')
           seller: $scope.currentAuction.seller,
           minBid: $scope.currentAuction.minBid,
           winBid: $scope.currentAuction.winBid,
-          sellerId: $scope.currentAuction.sellerId,
         };
         scope.winner = $scope.user;
         scope.winner.bid = $scope.bid;

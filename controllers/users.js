@@ -36,11 +36,27 @@ exports.findUser = (req, res) => {
 };
 
 exports.findUserByUsername = (req, res) => {
+  const users = [];
+  const user = {
+    username: '',
+    coins: 0,
+    breads: 0,
+    carrots: 0,
+    diamond: 0,
+  };
+
   User.findAll({
     where: {
       username: req.params.username,
     },
-  }).then((users) => {
+  }).then((_user) => {
+    user.username = _user[0].dataValues.username;
+    user.coins = _user[0].dataValues.coins;
+    user.breads = _user[0].dataValues.breads;
+    user.carrots = _user[0].dataValues.carrots;
+    user.diamond = _user[0].dataValues.diamond;
+    users.push(user);
+
     res.status(200).json(users);
   }).catch((error) => {
     res.status(500).json(error);

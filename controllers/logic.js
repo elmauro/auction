@@ -36,7 +36,7 @@ logic.validateBid = () => {
     return false;
   }
 
-  if (logic.scope.user.id === logic.scope.currentAuction.sellerId) {
+  if (logic.scope.user.username === logic.scope.currentAuction.seller) {
     logic.scope.bidErrorMessage = 'No, you are the same seller!';
     return false;
   }

@@ -20,6 +20,7 @@ let currentAuction = {};
 let winner = {};
 const usersConnected = {};
 let counter = 3;
+let sellerId;
 
 const DBCountdown = setInterval(() => {
   counter--;
@@ -43,10 +44,11 @@ io.on('connection', (socket) => {
     logic.scope = scope;
     logic.scope.currentAuction = scope.currentAuction;
     logic.scope.auction = scope.auction;
-    logic.scope.auction.time = 10;
+    logic.scope.auction.time = 90;
 
     UserCtrl.getUser(scope, (response) => {
       const user = response[0];
+      sellerId = user.id;
 
       scope.inventory = [
         { name: 'breads', quantity: user.breads, image: 'images/bread.jpg' },
@@ -62,19 +64,31 @@ io.on('connection', (socket) => {
           io.emit('counter', counter);
           counter--;
 
-          if (counter < 0) {
+          if (counter === -1) {
             console.log('Auction ended! ', winner);
 
             if (winner.username) {
-              UserCtrl.updateSeller(scope, scope.currentAuction.sellerId, () => {
-                UserCtrl.updateBuyer(scope, scope.winner.id, () => {
-                  io.emit('winner', winner);
+              UserCtrl.getUser({
+                currentAuction: { user: { username: winner.username } },
+              }, (_response) => {
+                scope.winner.id = _response[0].id;
 
-                  clearInterval(WinnerCountdown);
-                  currentAuction = {};
-                  winner = {};
+                UserCtrl.updateSeller(scope, sellerId, () => {
+                  UserCtrl.updateBuyer(scope, scope.winner.id, () => {
+                    io.emit('winner', winner);
+
+                    clearInterval(WinnerCountdown);
+                    sellerId = undefined;
+                    currentAuction = {};
+                    winner = {};
+                  });
                 });
               });
+            } else {
+              clearInterval(WinnerCountdown);
+              sellerId = undefined;
+              currentAuction = {};
+              winner = {};
             }
           }
         }, 1000);
@@ -112,7 +126,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('getCurrentAuction', () => {
-    if (currentAuction.sellerId) {
+    if (currentAuction.seller) {
       io.emit('currentAuction', { message: '', valid: true, currentAuction, toggle: false });
       if (counter) {
         io.emit('counter', counter);
