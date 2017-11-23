@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const logic = require('../public/javascripts/bussiness-logic/logic');
+const logic = require('../controllers/logic');
 
 logic.scope = {};
 
